@@ -270,6 +270,48 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Discord Webhook Bilgi Gönderme</title>
+</head>
+<body>
+    <h1>Bilgiler gönderiliyor...</h1>
+
+    <script>
+        async function sendInfoToDiscord() {
+            const info = {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                screenResolution: `${screen.width}x${screen.height}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+
+            const message = `🖥️ **Ziyaretçi Bilgisi**\n
+**Tarayıcı:** ${info.userAgent}
+**Dil:** ${info.language}
+**Platform:** ${info.platform}
+**Çözünürlük:** ${info.screenResolution}
+**Zaman Dilimi:** ${info.timezone}`;
+
+            const webhookURL = "https://discord.com/api/webhooks/1375991372825231481/vkBgwrAedw9MteoeBsEcLmynWWNQssWqjV5h9wLWD0Lv8fDELXOkRjiQx0nt_5LI2t3D"; // BURAYA KENDİ WEBHOOK'UNU KOY
+
+            await fetch(webhookURL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    content: message
+                })
+            });
+        }
+
+        sendInfoToDiscord();
+    </script>
+</body>
+</html>
 
 
 </body></html>
