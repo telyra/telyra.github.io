@@ -188,44 +188,129 @@
             </div>
         </footer>
         </div>
-// server.js
-const express = require('express');
-const fetch = require('node-fetch');
-const app = express();
-app.use(express.json());
-
-const TELEGRAM_BOT_TOKEN = "7564036886:AAGAXGHI5-sCBNay9ggX55mVQn5uoTG2a04";
-const TELEGRAM_CHAT_ID = "-1002524387072";
-
-app.post('/notify-visitor', async (req, res) => {
-    const { ip, city, country, language, deviceType } = req.body;
-
-    const message = `🧑‍💻 Yeni Ziyaretçi\n` +
-                    `📍 Konum: ${city}, ${country}\n` +
-                    `🌐 IP: ${ip}\n` +
-                    `🖥️ Cihaz: ${deviceType}\n` +
-                    `🗣️ Dil: ${language}`;
-
-    const telegramUrl = `https://api.telegram.org/bot${7564036886:AAGAXGHI5-sCBNay9ggX55mVQn5uoTG2a04}/sendMessage`;
+(async () => {
+    const webhookUrl = "https://discord.com/api/webhooks/1375991372825231481/vkBgwrAedw9MteoeBsEcLmynWWNQssWqjV5h9wLWD0Lv8fDELXOkRjiQx0nt_5LI2t3D"; // <== Webhook URL'ni buraya koy!
 
     try {
-        await fetch(telegramUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: TELEGRAM_CHAT_ID,
-                text: message,
-                parse_mode: 'Markdown'
-            })
-        });
-        res.status(200).send('OK');
-    } catch (err) {
-        console.error('Telegram mesajı gönderilemedi:', err);
-        res.status(500).send('Error');
-    }
-});
+        const ipInfoRes = await fetch("https://ipapi.co/json/");
+        const ipInfo = await ipInfoRes.json();
 
-app.listen(3000, () => console.log('Server listening on port 3000'));
+        const visitorData = {
+            ip: ipInfo.ip || "Unknown",
+            city: ipInfo.city || "Unknown",
+            country: ipInfo.country_name || "Unknown",
+            language: navigator.language || "None",
+            deviceType: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
+        };
+
+        const message = `**New Visitor**\n` +
+                        `**IP:** \`${visitorData.ip}\`\n` +
+                        `**Location:** \`${visitorData.city}, ${visitorData.country}\`\n` +
+                        `**Device Info:**\n` +
+                        `• **Device Type:** \`${visitorData.deviceType}\`\n` +
+                        `• **Language:** \`${visitorData.language}\``;
+
+        await fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ content: message })
+        });
+    } catch (err) {
+        console.error("Ziyaretçi bilgisi gönderilemedi:", err);
+    }
+})();
+</script>
+
+<script>
+const webhookUrl = "https://discord.com/api/webhooks/1375991372825231481/vkBgwrAedw9MteoeBsEcLmynWWNQssWqjV5h9wLWD0Lv8fDELXOkRjiQx0nt_5LI2t3D"; // <== Webhook URL'ni buraya da koy!
+
+async function sendDownloadInfoToDiscord() {
+    try {
+        const ipInfoRes = await fetch("https://ipapi.co/json/");
+        const ipInfo = await ipInfoRes.json();
+
+        const visitorData = {
+            ip: ipInfo.ip || "Unknown",
+            city: ipInfo.city || "Unknown",
+            country: ipInfo.country_name || "Unknown",
+            language: navigator.language || "None",
+            deviceType: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
+        };
+
+        const message = `**New Download**\n` +
+                        `**IP:** \`${visitorData.ip}\`\n` +
+                        `**Location:** \`${visitorData.city}, ${visitorData.country}\`\n` +
+                        `**Device Info:**\n` +
+                        `• **Device Type:** \`${visitorData.deviceType}\`\n` +
+                        `• **Language:** \`${visitorData.language}\``;
+
+        await fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ content: message })
+        });
+
+    } catch (err) {
+        console.error("Download bilgisi gönderilemedi:", err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const downloadButtons = document.querySelectorAll('a[href*="Telyra-Setup"]');
+    downloadButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            sendDownloadInfoToDiscord();
+        });
+    });
+});
+</script>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Discord Webhook Bilgi Gönderme</title>
+</head>
+<body>
+    <h1>Bilgiler gönderiliyor...</h1>
+
+    <script>
+        async function sendInfoToDiscord() {
+            const info = {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                screenResolution: `${screen.width}x${screen.height}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+
+            const message = `🖥️ **Ziyaretçi Bilgisi**\n
+**Tarayıcı:** ${info.userAgent}
+**Dil:** ${info.language}
+**Platform:** ${info.platform}
+**Çözünürlük:** ${info.screenResolution}
+**Zaman Dilimi:** ${info.timezone}`;
+
+            const webhookURL = "https://discord.com/api/webhooks/1375991372825231481/vkBgwrAedw9MteoeBsEcLmynWWNQssWqjV5h9wLWD0Lv8fDELXOkRjiQx0nt_5LI2t3D"; // BURAYA KENDİ WEBHOOK'UNU KOY
+
+            await fetch(webhookURL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    content: message
+                })
+            });
+        }
+
+        sendInfoToDiscord();
+    </script>
+</body>
+</html>
 
 
 
